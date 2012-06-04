@@ -6,3 +6,20 @@ To build:
 
 To run (Example):
 ./bencher -h127.0.0.1 -P33306 -ujohan -pseveralnines -r 3600 -t 2 -e "select 1"
+
+
+Output:
+
+------- Starting Benchmark - iteration  (1 / 3) ----------
+Thread 0 - warming up for 5 seconds
+Thread 0 - warmup complete
+Thread   0 - tps: 215.80 (stdev=60.75) latency: 4638.98 us (stdev=5828.74) 95th: 5507 us (averages measured after 5 secs) exec_count=1079 aggregate_time=5005462
+Thread   0 - tps: 223.70 (stdev=60.34) latency: 4473.76 us (stdev=4474.02) 95th: 5495 us (averages measured after 10 secs) exec_count=2237 aggregate_time=10007796
+Thread   0 - tps: 225.87 (stdev=60.47) latency: 4430.58 us (stdev=3844.47) 95th: 5492 us (averages measured after 15 secs) exec_count=3388 aggregate_time=15010818
+Thread   0 - tps: 225.25 (stdev=61.05) latency: 4442.73 us (stdev=3749.57) 95th: 5487 us (averages measured after 20 secs) exec_count=4505 aggregate_time=20014494
+Thread   0 - tps: 226.64 (stdev=60.79) latency: 4415.13 us (stdev=3389.53) 95th: 5487 us (averages measured after 25 secs) exec_count=5666 aggregate_time=25016109
+Thread   0 - tps: 227.83 (stdev=60.76) latency: 4391.99 us (stdev=3130.34) 95th: 5455 us (averages measured after 30 secs) exec_count=6835 aggregate_time=30019284
+Thread   0 - tps: 228.57 (stdev=60.55) latency: 4377.91 us (stdev=2918.88) 95th: 5454 us (averages measured after 35 secs) exec_count=8000 aggregate_time=35023306
+Thread   0 - tps: 228.88 (stdev=60.87) latency: 4372.28 us (stdev=2776.43) 95th: 5450 us (averages measured after 40 secs) exec_count=9155 aggregate_time=40028204
+
+
