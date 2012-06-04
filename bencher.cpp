@@ -83,20 +83,20 @@ void
 print_help()
 {
   printf("Usage: bencher  \n"
-	 " -h --mysqlhost=mysql hostname (localhost)\n"	 
-	 " -u --mysqluser=mysql username (root)\n"	 
-	 " -p --mysqlpassword=mysql password (\"\")\n"	 
-	 " -s --mysqlsocket=mysql socket (/tmp/mysql.sock)\n"
-	 " -e --mysqlquery=query  (not set)\n" 	 
+	 " -h --host=mysql hostname (localhost)\n"	 
+	 " -u --user=mysql username (root)\n"	 
+	 " -p --password=mysql password (\"\")\n"	 
+	 " -S --socket=mysql socket (/tmp/mysql.sock)\n"
+	 " -e --execute=query  (not set)\n" 	 
 	 " -i --cleanupquery=query  (not set)\n" 	 
-	 " -P --mysqlport=mysql port  (3306)\n" 	 
+	 " -P --port=mysql port  (3306)\n" 	 
 	 " -d --database=databaseName  (test)\n" 
 	 " -t --threads=N  (1)\n" 
 	 " -l --loops=N (10000)\n"
 	 " -b --batch=N (1)\n"
 	 " -r --runtime=N (specfies how many seconds the test should run, cannot be used with --loops)\n"
-	 " -o --output=<testname>  (writes stats to two files for gnuplot)\n"
-	 " -T --querytime-threshold=N  (5)\n" 
+	 " -o --output=<testname>  (writes stats to two files for gnuplot). NOT WORKING.\n"
+	 " -T --querytime-threshold=N  (5ms)\n" 
 	 );
   exit(1);
 }
@@ -113,12 +113,12 @@ int option(int argc, char** argv)
 	{
 	  {"help", 0, 0, '?'},
 	  {"database", 1, 0, 'd'},
-	  {"mysqlhost", 1, 0, 'h'},
-	  {"mysqluser", 1, 0, 'u'},
-	  {"mysqlpassword", 1, 0, 'p'},
-	  {"mysqlsocket", 1, 0, 's'},
-	  {"mysqlport", 1, 0, 'P'},
-	  {"mysqlquery", 1, 0, 'e'},
+	  {"host", 1, 0, 'h'},
+	  {"user", 1, 0, 'u'},
+	  {"password", 1, 0, 'p'},
+	  {"socket", 1, 0, 'S'},
+	  {"port", 1, 0, 'P'},
+	  {"execute", 1, 0, 'e'},
 	  {"cleanupquery", 1, 0, 'i'},
 	  {"threads", 1, 0, 't'},
 	  {"loops", 1, 0, 'l'},
@@ -132,7 +132,7 @@ int option(int argc, char** argv)
       /* getopt_long stores the option index here.   */
       int option_index = 0;
 
-      c = getopt_long (argc, argv, "?ad:c:t:l:P:p:u:h:s:e:T:r:b:w:o:mi:",
+      c = getopt_long (argc, argv, "?ad:c:t:l:P:p:u:h:S:e:T:r:b:w:o:mi:",
 		       long_options, &option_index);
 
       /* Detect the end of the options.   */
