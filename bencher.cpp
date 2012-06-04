@@ -66,6 +66,7 @@ uint g_warmup_time=5*1000*1000;
 int g_multi=0;
 uint g_less_than_ms=5;
 bool g_write_file=false;
+bool g_persistent_connection=false;
 const int64 sec2usec=1000*1000;
 const char * thisFile = __FILE__;
 
@@ -97,6 +98,7 @@ print_help()
 	 " -r --runtime=N (specfies how many seconds the test should run, cannot be used with --loops)\n"
 	 " -o --output=<testname>  (writes stats to two files for gnuplot). NOT WORKING.\n"
 	 " -T --querytime-threshold=N  (5ms)\n" 
+	 " -C --persistent-connections=0|1 (0)\n"
 	 );
   exit(1);
 }
@@ -127,12 +129,13 @@ int option(int argc, char** argv)
 	  {"querytime-threshold", 1, 0, 'T'},
 	  {"runtime", 1, 0, 'r'},	  
 	  {"batch", 1, 0, 'b'},
+	  {"persistent-connections", 1, 0, 'C'},
 	  {0, 0, 0, 0}
 	};
       /* getopt_long stores the option index here.   */
       int option_index = 0;
 
-      c = getopt_long (argc, argv, "?ad:c:t:l:P:p:u:h:S:e:T:r:b:w:o:mi:",
+      c = getopt_long (argc, argv, "?ad:c:t:l:P:p:u:h:S:e:T:r:b:w:o:mi:C:",
 		       long_options, &option_index);
 
       /* Detect the end of the options.   */
@@ -192,6 +195,9 @@ int option(int argc, char** argv)
 	  break;
 	case 'b':
 	  g_batch=atoi(optarg);
+	  break;
+	case 'C':
+	  g_persistent_connection=(bool)atoi(optarg);	  
 	  break;
 	case 'r':
 	  g_runtime=atoi(optarg);
@@ -645,6 +651,24 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
     fprintf(stderr,"Thread %d - warming up for %d seconds\n",ctx->threadid, g_warmup_time/(1000*1000));
   ctx->exec_count=0;
   ctx->aggregateTime=0;
+  
+  if(g_persistent_connection)
+    {
+      if(!mysql_real_connect(&mysql, 
+			     mysqlhost,
+			     mysqluser,
+			     mysqlpass,
+			     g_database,
+				 g_port, 
+			     mysqlsocket,
+			     CLIENT_MULTI_STATEMENTS))
+	{
+	  
+	  fprintf(stderr,"%s\n", mysql_error(&mysql));
+	  stopTest=true;
+	  return 0;	  
+	}
+    }
 
   while(true)
     {
@@ -653,20 +677,23 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
       mysql_init(&mysql);
       
       
-      if(!mysql_real_connect(&mysql, 
-			     mysqlhost,
-			     mysqluser,
-			     mysqlpass,
-			     g_database,
-			     g_port, 
-			     mysqlsocket,
-			     CLIENT_MULTI_STATEMENTS))
+
+      if(!g_persistent_connection)
 	{
-	  
-	  fprintf(stderr,"%s\n", mysql_error(&mysql));
-	  stopTest=true;
-	  usleep(500*1000);
-	  goto retry;
+	  if(!mysql_real_connect(&mysql, 
+				 mysqlhost,
+				 mysqluser,
+				 mysqlpass,
+				 g_database,
+				 g_port, 
+				 mysqlsocket,
+				 CLIENT_MULTI_STATEMENTS))
+	    {
+	      
+	      fprintf(stderr,"%s\n", mysql_error(&mysql));	
+	      usleep(500*1000);
+	      goto retry;
+	    }
 	}
       
       
@@ -731,7 +758,11 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
 		 mysql_error(&mysql),
 		 errno, 
 		 query);
-	  mysql_close(&mysql);
+
+
+	  if(!g_persistent_connection)
+	    mysql_close(&mysql);
+	  
 	  if(errno == 1297)
 	    {
 	      /*temporary error - retry*/
@@ -750,7 +781,7 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
       
       
 
-      if(!warmup)
+      if(!warmup && !g_persistent_connection)
 	mysql_close(&mysql);  
       
       ctx->stopTimeMicrosecTrx=JULIANTIMESTAMP();
@@ -787,7 +818,9 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
 	}
       i++;
     }
-
+  if(g_persistent_connection)
+    mysql_close(&mysql);  
+  
   ctx->stopTimeMicrosec=JULIANTIMESTAMP();	 
   return 0;    
   
