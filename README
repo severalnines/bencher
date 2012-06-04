@@ -1,0 +1,8 @@
+
+To build:
+
+* Edit Makefile to set MYSQL_BASEDIR
+* make
+
+To run (Example):
+./bencher -h127.0.0.1 -P33306 -ujohan -pseveralnines -r 3600 -t 2 -e "select 1"
