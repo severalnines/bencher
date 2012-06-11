@@ -66,7 +66,7 @@ uint g_warmup_time=5*1000*1000;
 int g_multi=0;
 uint g_less_than_ms=5;
 bool g_write_file=false;
-bool g_persistent_connection=false;
+bool g_persistent_connection=true;
 const int64 sec2usec=1000*1000;
 const char * thisFile = __FILE__;
 
@@ -135,7 +135,7 @@ int option(int argc, char** argv)
       /* getopt_long stores the option index here.   */
       int option_index = 0;
 
-      c = getopt_long (argc, argv, "?ad:c:t:l:P:p:u:h:S:e:T:r:b:w:o:mi:C:",
+      c = getopt_long (argc, argv, "?ad:c:t:l:P:p:u:h:S:e:T:r:b:w:o:mi:C",
 		       long_options, &option_index);
 
       /* Detect the end of the options.   */
@@ -197,7 +197,7 @@ int option(int argc, char** argv)
 	  g_batch=atoi(optarg);
 	  break;
 	case 'C':
-	  g_persistent_connection=(bool)atoi(optarg);	  
+	  g_persistent_connection=false;
 	  break;
 	case 'r':
 	  g_runtime=atoi(optarg);
@@ -654,12 +654,13 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
   
   if(g_persistent_connection)
     {
+      mysql_init(&mysql);
       if(!mysql_real_connect(&mysql, 
 			     mysqlhost,
 			     mysqluser,
 			     mysqlpass,
 			     g_database,
-				 g_port, 
+			     g_port, 
 			     mysqlsocket,
 			     CLIENT_MULTI_STATEMENTS))
 	{
@@ -674,12 +675,12 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
     {
       ctx->startTimeMicrosecTrx=JULIANTIMESTAMP();	 
     retry:
-      mysql_init(&mysql);
       
       
 
       if(!g_persistent_connection)
 	{
+          mysql_init(&mysql);
 	  if(!mysql_real_connect(&mysql, 
 				 mysqlhost,
 				 mysqluser,
@@ -771,7 +772,8 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
 	      goto retry;
 	    }
 	  usleep(500*1000);
-	  goto retry;
+	  if(!g_persistent_connection)
+	     goto retry;
 	}
       
 
@@ -799,7 +801,8 @@ create table t1(id integer primary key auto_increment, tid integer, data1 varcha
 	      //elapsed_time=0;	
 	      ctx->reset();
 	    }
-	  goto retry;
+	   continue;
+	 // goto retry;
 	}
       
       ctx->printStats(5);

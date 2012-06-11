@@ -2,7 +2,7 @@ TARGET = bencher
 SRCS = $(TARGET).cpp
 OBJS = $(TARGET).o
 CXX = g++
-CFLAGS = -c -Wall -O2 -fno-rtti -fno-exceptions
+CFLAGS = -c -Wall -O2 -fno-rtti -fno-exceptions -g
 CXXFLAGS = 
 DEBUG = 
 
@@ -14,7 +14,7 @@ LIB_DIR = -L$(MYSQL_BASEDIR)/lib  -L$(MYSQL_BASEDIR)/lib64/ -L$(MYSQL_BASEDIR)/l
 #LIB_DIR = -L$(MYSQL_BASEDIR)/lib  
 
 
-LFLAGS = -Wall  -Wl,-rpath -Wl,$(MYSQL_BASEDIR)/lib
+LFLAGS = -Wall  -Wl,-rpath -Wl,$(MYSQL_BASEDIR)/lib -g
 SYS_LIB = -lrt -lpthread -ldl
 
 $(TARGET): $(OBJS)
